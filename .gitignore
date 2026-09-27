@@ -1,0 +1,30 @@
+# Dependencies and build products
+node_modules/
+coverage/
+.test-build/
+artifacts/
+*.tsbuildinfo
+.DS_Store
+*.log
+
+# Private local configuration and signing material
+.env*
+!.env.example
+*.pem
+*.jks
+*.keystore
+android/local.properties
+android/signing.properties
+android/.gradle/
+android/**/build/
+android/app/src/main/assets/
+
+# Personal data and editor state
+*.db
+*.sqlite*
+.vscode/
+.idea/
+
+# Required for reproducible builds, including when global ignores match these files
+!package-lock.json
+!android/gradle/wrapper/gradle-wrapper.jar

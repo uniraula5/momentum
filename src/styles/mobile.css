@@ -1,0 +1,37 @@
+html { overscroll-behavior: none; -webkit-tap-highlight-color: transparent; }
+body { touch-action: manipulation; }
+button, input, textarea, select { font: inherit; }
+button.primary, button.icon-button { min-height: 44px; }
+input, textarea { font-size: 16px; }
+.mobile-app .brand { cursor: default; }
+.mobile-app .nav-wrap { position: fixed; inset: auto 0 0; z-index: 30; background: #fff; border-top: 1px solid var(--border); }
+.mobile-app .nav-tabs { width: 100%; height: 62px; justify-content: space-around; gap: 0; padding: 0 4px; }
+.mobile-app .nav-tabs [role=tab] { flex: 1; min-width: 0; height: 58px; padding: 4px 2px; font-size: 11px; flex-direction: column; gap: 3px; }
+.mobile-app .nav-tabs [role=tab] svg { width: 20px; height: 20px; }
+.mobile-app .nav-tabs [role=tab]::after { display: none; }
+.mobile-app .nav-tabs [role=tab][data-state=active] { color: var(--primary); background: #edf3e8; border-radius: 10px; }
+.mobile-app .main-tabs { padding-bottom: 72px; }
+.mobile-app .sync { display: inline-flex !important; font-size: 11px; }
+.mobile-app .top-tag, .mobile-app .avatar { display: none; }
+.mobile-app .topbar { padding: 12px 16px; }
+.mobile-app .account { margin-left: auto; }
+.mobile-app .heatmap-scroll { overscroll-behavior-x: contain; }
+.mobile-app [data-slot=dialog-content], .mobile-app [role=dialog] { max-height: 88dvh; overflow-y: auto; }
+[data-sonner-toaster] { bottom: 80px !important; }
+.mobile-app .nav-wrap { height: 66px; padding: 0 6px; overflow: visible; }
+.mobile-app .nav-tabs { height: 66px !important; }
+.mobile-app .nav-tabs [role=tab] svg { display: block; }
+.mobile-app main { padding: 18px 14px 0; }
+.mobile-app .page-heading { gap: 10px; margin-bottom: 16px; }
+.mobile-app .page-heading h1 { font-size: 1.5rem; letter-spacing: -0.6px; }
+.mobile-app .page-heading p:not(.eyebrow) { display: none; }
+.mobile-app .page-heading .eyebrow { font-size: 10px !important; margin-bottom: 6px; }
+.mobile-app .page-heading > .primary { min-height: 40px; }
+.mobile-app .daily-score { min-height: 126px; padding: 16px 20px; }
+.mobile-app .score-number { font-size: 2.3rem; margin: 4px 0; }
+.mobile-app .score-right > span { display: none; }
+.mobile-app .daily-score p { font-size: 12px; }
+.mobile-app .progress-ring { width: 84px; height: 84px; }
+.mobile-app .left-column { gap: 14px; }
+.mobile-app .week-strip button { min-height: 60px; }
+.mobile-app button[role=checkbox] { min-height: 0; }

@@ -1,0 +1,16 @@
+# Changelog
+
+## 2.0.1 — 2026-09-27
+
+- Organize the offline app as a standalone Android project.
+- Replace specialist learning labels with general computer science and software-development routines.
+- Update unchanged starter labels on existing installations without removing check-ins or custom routine names.
+- Remove unused hosted-app code, platform branding, and unnecessary dependencies from the Android project.
+- Add build scripts, continuous integration, and user/developer documentation.
+
+## 2.0.0 — 2026-09-27
+
+- Bundle the full tracker interface inside the Android app.
+- Add private SQLite storage, bottom navigation, and Android file-picker backups.
+- Support offline habits, streaks, calendars, goals, notes, and weekly reviews.
+- Remove browser launching and network requirements.

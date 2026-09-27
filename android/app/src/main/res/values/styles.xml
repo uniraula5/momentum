@@ -1,0 +1,9 @@
+<resources>
+    <style name="Theme.Momentum" parent="android:style/Theme.Material.Light.NoActionBar">
+        <item name="android:fontFamily">sans</item>
+        <item name="android:colorAccent">@color/momentum_dark</item>
+        <item name="android:windowLightStatusBar">true</item>
+        <item name="android:windowBackground">@color/momentum_background</item>
+        <item name="android:windowActionModeOverlay">true</item>
+    </style>
+</resources>

@@ -1,0 +1,11 @@
+.gradle/
+**/build/
+local.properties
+signing.properties
+*.jks
+*.keystore
+captures/
+
+.avd/
+
+app/src/main/assets/
