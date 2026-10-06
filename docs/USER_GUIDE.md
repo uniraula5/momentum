@@ -4,11 +4,17 @@
 
 Use a habit's checkbox to complete its target. Tap its log button for a partial amount, session note, or recovery day. Select a date to record or correct past activity. Entries before a habit's start date and future entries are not allowed.
 
+The week arrows move between weeks. Returning to the current week selects today if the previous weekday would be in the future. **Back to today** jumps straight to the current date.
+
 A recovery check-in preserves the streak without counting as a completed activity. Use editable targets appropriate to your own routine.
 
 ## Calendar
 
-View the annual contribution calendar, select an activity, and inspect current/longest streaks and recent consistency. Calendar intensity reflects completed activities. Activity cards include their own recent history.
+Open **Calendar** to see a separate 12-week history for every activity. Tap an activity card to open its annual calendar and statistics. New activities appear automatically, including those created from Routines or the Calendar tab.
+
+Colors describe only that activity: green for completed targets, amber for partial progress, striped blue for recovery, muted rose for a past missed target, and outlined white for an unscheduled day. Future dates and dates outside the activity’s lifetime cannot be edited. Logging other activities never changes this calendar’s colors.
+
+Tap an available day to log or correct that activity. Choose another year or switch activities using the selectors. **All activity calendars** returns to the list; Android Back also returns from the detail view to the list. The Today screen keeps its date selector for logging but no longer includes a combined contribution calendar.
 
 ## Goals
 

@@ -32,3 +32,11 @@ Use a disposable QA installation for destructive tests. For an existing daily in
 - Update a signed release in place; confirm existing records and customized names survive.
 
 Production has no `INTERNET` permission. Inspect the built APK manifest and verify its certificate with the Android SDK tools before release.
+
+## 2.0.2 calendar regression checks
+
+All 25 automated tests pass, including all 49 combinations of the previous and current weekday, Sunday-to-Tuesday navigation, year boundaries, and independent activity status calculations. TypeScript checking, the production interface build, signed APK assembly, and Android release lint pass (zero errors; six existing nonblocking warnings).
+
+At a 393 × 851 mobile viewport, the bundled UI was exercised with disposable records and a simulated native storage bridge: previous Sunday → current Tuesday, automatic calendar creation for a new activity, logging directly from that calendar, unchanged state in another activity, and persistence after reload. The Today screen no longer includes a combined contribution calendar.
+
+No Android device was connected during this update, so installation and physical-device touch checks remain unverified for 2.0.2. The test bridge exists only in ignored preview artifacts and is not packaged in the APK.

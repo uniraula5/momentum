@@ -1,5 +1,14 @@
 # Changelog
 
+## 2.0.2 — 2026-10-06
+
+- Fixed returning from a past week when its selected weekday falls after today in the current week.
+- Removed the combined contribution calendar from Today and the all-activities calendar view.
+- Added dedicated activity-calendar browsing, automatic calendars for new activities, and direct logging from each calendar.
+- Calendar colors reflect only the selected activity, with clear states for partial progress, recovery, missed targets, and unscheduled days.
+- Added regression coverage for every weekday navigation combination, calendar isolation, and activity lifecycle boundaries.
+
+
 ## 2.0.1 — 2026-09-27
 
 - Organize the offline app as a standalone Android project.

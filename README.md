@@ -10,7 +10,7 @@ An offline Android habit tracker for building a consistent practice across learn
 
 - Daily check-ins with numeric targets, session notes, historical entries, and recovery days.
 - Current and longest streaks based on each habit's scheduled days.
-- Annual contribution calendars and per-activity consistency views.
+- Individual activity calendars with fixed completion, partial-progress, recovery, and missed-day colors; new activities get a calendar automatically.
 - Editable weekday schedules and targets with preserved history.
 - Milestones for projects, applications, conversations, and personal skills.
 - Weekly reflections, energy ratings, and locally retained review drafts.

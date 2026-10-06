@@ -82,6 +82,7 @@ import {
   streaks,
   stats,
 } from "@/lib/tracker";
+import { canGoToNextWeek, nextWeekDate, activityDayStatus, calendarStatusLabels } from "@/lib/calendar";
 import { stateSchema } from "@/lib/validation";
 import { phoneStorage, type TrackerStorage } from "@/platform/storage";
 
@@ -153,7 +154,7 @@ export default function Tracker({ storage = phoneStorage }: { storage?: TrackerS
   const [tab, setTab] = useState("today"),
     [date, setDate] = useState(dateKey()),
     [category, setCategory] = useState("All"),
-    [selectedHabit, setSelectedHabit] = useState("all"),
+    [selectedHabit, setSelectedHabit] = useState<string | null>(null),
     [year, setYear] = useState(new Date().getFullYear());
   const [editHabit, setEditHabit] = useState<Habit | "new" | null>(null),
     [logHabit, setLogHabit] = useState<Habit | null>(null),
@@ -189,12 +190,13 @@ export default function Tracker({ storage = phoneStorage }: { storage?: TrackerS
       else if (logHabit) setLogHabit(null);
       else if (editGoal) setEditGoal(null);
       else if (importData) setImportData(null);
+      else if (tab === "consistency" && selectedHabit) setSelectedHabit(null);
       else if (tab !== "today") setTab("today");
       else window.Momentum?.closeApp();
     };
     window.addEventListener("momentum-back", back);
     return () => window.removeEventListener("momentum-back", back);
-  }, [offline, editHabit, logHabit, editGoal, importData, tab]);
+  }, [offline, editHabit, logHabit, editGoal, importData, tab, selectedHabit]);
   async function load() {
     try {
       const j = await storage.load();
@@ -367,16 +369,11 @@ export default function Tracker({ storage = phoneStorage }: { storage?: TrackerS
     ),
   );
   const habitOptions = [
-    { value: "all", label: "All activities" },
     ...data.habits.map((h) => ({
       value: h.id,
       label: h.name + (h.archived ? " · archived" : ""),
     })),
   ];
-  const heatHabits =
-    selectedHabit === "all"
-      ? data.habits
-      : data.habits.filter((h) => h.id === selectedHabit);
   const currentHabit = data.habits.find((h) => h.id === selectedHabit);
   return (
     <TooltipProvider>
@@ -567,8 +564,8 @@ export default function Tracker({ storage = phoneStorage }: { storage?: TrackerS
                         <button
                           className="icon-button"
                           aria-label="Next week"
-                          disabled={shiftDay(date, 7) > today}
-                          onClick={() => setDate(shiftDay(date, 7))}
+                          disabled={!canGoToNextWeek(date, today)}
+                          onClick={() => setDate(nextWeekDate(date, today))}
                         >
                           <ChevronRight size={18} />
                         </button>
@@ -576,7 +573,6 @@ export default function Tracker({ storage = phoneStorage }: { storage?: TrackerS
                     </div>
                     <div className="week-strip">
                       {weekDays.map((d) => {
-                        const st = stats(data, data.habits, d, d);
                         return (
                           <button
                             key={d}
@@ -587,11 +583,6 @@ export default function Tracker({ storage = phoneStorage }: { storage?: TrackerS
                           >
                             <span>{dateLabel(d, { weekday: "short" })}</span>
                             <strong>{parseDay(d).getUTCDate()}</strong>
-                            <span
-                              className={
-                                "week-dot " + (st.done > 0 ? "filled" : "")
-                              }
-                            />
                           </button>
                         );
                       })}
@@ -801,35 +792,15 @@ export default function Tracker({ storage = phoneStorage }: { storage?: TrackerS
                   </section>
                 </aside>
               </div>
-              <section className="panel overview-calendar">
-                <div className="section-head">
-                  <div>
-                    <p className="eyebrow">THE BIG PICTURE</p>
-                    <h2>Your year of showing up</h2>
-                  </div>
-                  <button
-                    className="text-button"
-                    onClick={() => setTab("consistency")}
-                  >
-                    Explore activities <ArrowUpRight size={16} />
-                  </button>
-                </div>
-                <Heatmap
-                  data={data}
-                  habits={data.habits}
-                  year={+today.slice(0, 4)}
-                  today={today}
-                  onDay={(d) => setDate(d)}
-                />
-              </section>
             </TabsContent>
             <TabsContent value="consistency">
               <section className="page-heading">
                 <div>
                   <p className="eyebrow">EVERY CHECK-IN COUNTS</p>
-                  <h1>Consistency, made visible.</h1>
-                  <p>A full picture of your practice, one square at a time.</p>
+                  <h1>{currentHabit ? currentHabit.name : "Your activity calendars."}</h1>
+                  <p>One calendar per activity. Every check-in stays in its own history.</p>
                 </div>
+                {currentHabit ? (
                 <Pick
                   label="Calendar year"
                   value={String(year)}
@@ -852,36 +823,39 @@ export default function Tracker({ storage = phoneStorage }: { storage?: TrackerS
                     }),
                   )}
                 />
+                ) : (
+                  <button className="primary" onClick={() => setEditHabit("new")}><Plus size={18} /> New activity</button>
+                )}
               </section>
+              {currentHabit ? <>
+              <button className="text-button calendar-back" onClick={() => setSelectedHabit(null)}><ChevronLeft size={18} /> All activity calendars</button>
               <section className="panel consistency-panel">
                 <div className="section-head">
                   <Pick
                     label="Calendar activity"
-                    value={selectedHabit}
+                    value={currentHabit.id}
                     onChange={setSelectedHabit}
                     options={habitOptions}
                   />
                   <span className="subtle">
-                    Select a day to view or edit its check-ins
+                    Select a day to log this activity
                   </span>
                 </div>
                 <Heatmap
                   data={data}
-                  habits={heatHabits}
+                  habit={currentHabit}
                   year={year}
                   today={today}
                   onDay={(d) => {
                     setDate(d);
-                    if (currentHabit && d >= currentHabit.created)
-                      setLogHabit(currentHabit);
-                    else setTab("today");
+                    setLogHabit(currentHabit);
                   }}
                 />
                 <div className="calendar-metrics">
                   {(() => {
                     const s = stats(
                       data,
-                      heatHabits,
+                      [currentHabit],
                       `${year}-01-01`,
                       `${year}-12-31` < today ? `${year}-12-31` : today,
                     );
@@ -912,10 +886,11 @@ export default function Tracker({ storage = phoneStorage }: { storage?: TrackerS
                   })()}
                 </div>
               </section>
+              </> : <>
               <div className="section-head activity-title">
                 <div>
-                  <h2>Every part of you.</h2>
-                  <p>Your activities at a glance · last 12 weeks</p>
+                  <h2>Choose an activity</h2>
+                  <p>Last 12 weeks · tap a card for its full calendar</p>
                 </div>
                 <Tooltip>
                   <TooltipTrigger asChild>
@@ -933,6 +908,7 @@ export default function Tracker({ storage = phoneStorage }: { storage?: TrackerS
                   </TooltipContent>
                 </Tooltip>
               </div>
+              <CalendarLegend />
               <div className="activity-grid">
                 {data.habits.map((h) => {
                   const st = streaks(data, h, today),
@@ -941,11 +917,11 @@ export default function Tracker({ storage = phoneStorage }: { storage?: TrackerS
                     <button
                       className="panel activity-card"
                       key={h.id}
+                      aria-label={"View calendar for " + h.name}
                       onClick={() => {
+                        setYear(+today.slice(0, 4));
                         setSelectedHabit(h.id);
-                        document
-                          .querySelector("main")
-                          ?.scrollIntoView({ behavior: "smooth" });
+                        window.scrollTo({ top: 0 });
                       }}
                     >
                       <div className="activity-card-head">
@@ -973,6 +949,8 @@ export default function Tracker({ storage = phoneStorage }: { storage?: TrackerS
                   );
                 })}
               </div>
+              {data.habits.length === 0 && <div className="empty-state"><CalendarDays /><h3>Your first activity starts here.</h3><p>Create an activity and its calendar appears automatically.</p></div>}
+              </>}
             </TabsContent>
             <TabsContent value="goals">
               <section className="page-heading">
@@ -1372,15 +1350,23 @@ export default function Tracker({ storage = phoneStorage }: { storage?: TrackerS
   );
 }
 
+function CalendarLegend() {
+  return <div className="legend" aria-label="Calendar colors">
+    {(["complete", "partial", "recovery", "missed", "off"] as const).map(status => (
+      <span className="legend-item" key={status}><i className={`heat-cell status-${status}`} />{calendarStatusLabels[status]}</span>
+    ))}
+  </div>;
+}
+
 function Heatmap({
   data,
-  habits,
+  habit,
   year,
   today,
   onDay,
 }: {
   data: State;
-  habits: Habit[];
+  habit: Habit;
   year: number;
   today: string;
   onDay: (d: string) => void;
@@ -1390,12 +1376,12 @@ function Heatmap({
     days = dateRange(start, end),
     weeks = days.length / 7;
   const [focus, setFocus] = useState(
-    today.slice(0, 4) === String(year) ? today : `${year}-12-31`,
+    days.filter(d => d.startsWith(String(year)) && activityDayStatus(data, habit, d, today) !== "unavailable").at(-1) ?? "",
   );
   const scrollRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     const focused =
-      today.slice(0, 4) === String(year) ? today : `${year}-12-31`;
+      days.filter(d => d.startsWith(String(year)) && activityDayStatus(data, habit, d, today) !== "unavailable").at(-1) ?? "";
     setFocus(focused);
     const el = scrollRef.current;
     if (el) {
@@ -1405,18 +1391,10 @@ function Heatmap({
         el.scrollWidth * proportion - el.clientWidth * 0.72,
       );
     }
-  }, [year, today]);
-  const total = habits.reduce(
-    (n, h) =>
-      n +
-      Object.entries(data.entries[h.id] ?? {}).filter(
-        ([d, e]) =>
-          d.startsWith(String(year)) &&
-          !e.rest &&
-          e.value >= planAt(h, d).target,
-      ).length,
-    0,
-  );
+  }, [year, today, habit.id, habit.created, habit.archived]);
+  const total = Object.entries(data.entries[habit.id] ?? {}).filter(
+    ([d]) => d.startsWith(String(year)) && completed(data, habit, d),
+  ).length;
   return (
     <div className="heatmap-wrap">
       <div className="heatmap-scroll" ref={scrollRef}>
@@ -1450,22 +1428,9 @@ function Heatmap({
             <div className="heatmap-grid">
               {days.map((d, i) => {
                 const inYear = d.startsWith(String(year)),
-                  future = d > today,
-                  done = habits.filter((h) => completed(data, h, d)).length,
-                  partial = habits.some(
-                    (h) => (entryAt(data, h, d)?.value ?? 0) > 0,
-                  ),
-                  rest = habits.some((h) => entryAt(data, h, d)?.rest),
-                  due = habits.filter((h) => scheduled(h, d)).length;
-                const level = done
-                  ? Math.max(
-                      1,
-                      Math.ceil(Math.min(1, done / Math.max(1, due)) * 4),
-                    )
-                  : partial
-                    ? 1
-                    : 0;
-                const label = `${dateLabel(d, { month: "long", day: "numeric", year: "numeric" })}: ${done} completed${partial && !done ? ", partial progress" : ""}${rest ? ", recovery logged" : ""}`;
+                  status = activityDayStatus(data, habit, d, today),
+                  unavailable = status === "unavailable";
+                const label = `${habit.name}, ${dateLabel(d, { month: "long", day: "numeric", year: "numeric" })}: ${calendarStatusLabels[status]}`;
                 return (
                   <button
                     key={d}
@@ -1474,8 +1439,8 @@ function Heatmap({
                     aria-label={label}
                     tabIndex={d === focus ? 0 : -1}
                     onFocus={() => setFocus(d)}
-                    disabled={!inYear || future}
-                    className={`heat-cell level-${level} ${!inYear ? "outside" : ""} ${future ? "future" : ""} ${rest && !done ? "recovery" : ""} ${d === today ? "today-cell" : ""}`}
+                    disabled={!inYear || unavailable}
+                    className={`heat-cell status-${status} ${!inYear ? "outside" : ""} ${d === today ? "today-cell" : ""}`}
                     onClick={() => onDay(d)}
                     onKeyDown={(e) => {
                       const offset = {
@@ -1489,7 +1454,7 @@ function Heatmap({
                         const next = days[i + offset];
                         if (
                           next &&
-                          next <= today &&
+                          activityDayStatus(data, habit, next, today) !== "unavailable" &&
                           next.startsWith(String(year))
                         ) {
                           setFocus(next);
@@ -1513,15 +1478,7 @@ function Heatmap({
           <strong>{total}</strong> completed check-ins in {year}
           {total === 0 ? " · Your first square is waiting." : ""}
         </span>
-        <div className="legend">
-          <span>Less</span>
-          {[0, 1, 2, 3, 4].map((i) => (
-            <i key={i} className={`heat-cell level-${i}`} />
-          ))}
-          <span>More</span>
-          <i className="heat-cell recovery" />
-          <span>Rest</span>
-        </div>
+        <CalendarLegend />
       </div>
     </div>
   );
@@ -1542,7 +1499,7 @@ function MiniHeatmap({
       {days.map((d) => (
         <i
           key={d}
-          className={`heat-cell level-${completed(data, habit, d) ? 4 : (entryAt(data, habit, d)?.value ?? 0) > 0 ? 1 : 0} ${entryAt(data, habit, d)?.rest ? "recovery" : ""} ${d > today ? "future" : ""}`}
+          className={`heat-cell status-${activityDayStatus(data, habit, d, today)}`}
         />
       ))}
     </div>
