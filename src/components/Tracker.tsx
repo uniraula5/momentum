@@ -140,7 +140,11 @@ function download(name: string, content: string, type = "application/json") {
   setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
-export default function Tracker({ storage = phoneStorage }: { storage?: TrackerStorage }) {
+export default function Tracker({ storage = phoneStorage, onPrivate }: { storage?: TrackerStorage; onPrivate?: () => void }) {
+  const hold = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const cancelHold = () => { if (hold.current) clearTimeout(hold.current); hold.current = null; };
+  const startHold = () => { cancelHold(); hold.current = setTimeout(() => { hold.current = null; onPrivate?.(); }, 900); };
+  useEffect(() => cancelHold, []);
   const offline = storage.offline;
   function exportData(name: string, content: string, type = "application/json") {
     if (storage.exportFile) storage.exportFile(name, content, type);
@@ -379,7 +383,9 @@ export default function Tracker({ storage = phoneStorage }: { storage?: TrackerS
     <TooltipProvider>
       <div className="app-shell">
         <header className="topbar">
-          <a className="brand" href={offline ? "#" : "/"} onClick={offline ? (e) => { e.preventDefault(); setTab("today"); } : undefined} aria-label="Momentum home">
+          <a className="brand" onPointerDown={startHold} onPointerUp={cancelHold} onPointerCancel={cancelHold} onPointerLeave={cancelHold}
+            onContextMenu={e => e.preventDefault()} onKeyDown={e => { if (e.altKey && e.key === "Enter") { e.preventDefault(); cancelHold(); onPrivate?.(); } else if ((e.key === " " || e.key === "Enter") && !e.repeat) { e.preventDefault(); startHold(); } }} onKeyUp={cancelHold} onBlur={cancelHold}
+            href={offline ? "#" : "/"} onClick={offline ? (e) => { e.preventDefault(); setTab("today"); } : undefined} aria-label="Momentum home">
             <span className="brand-mark">
               <TrendingUp size={22} />
             </span>
@@ -1358,7 +1364,7 @@ function CalendarLegend() {
   </div>;
 }
 
-function Heatmap({
+export function Heatmap({
   data,
   habit,
   year,
@@ -1506,7 +1512,7 @@ function MiniHeatmap({
   );
 }
 
-function LogForm({
+export function LogForm({
   h,
   data,
   date,
@@ -1605,7 +1611,7 @@ function LogForm({
     </>
   );
 }
-function HabitForm({
+export function HabitForm({
   habit,
   today,
   busy,

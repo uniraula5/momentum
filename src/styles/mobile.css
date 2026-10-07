@@ -60,3 +60,30 @@ input, textarea { font-size: 16px; }
 .day-axis span:nth-child(1) { grid-row: 1; }
 .day-axis span:nth-child(2) { grid-row: 3; }
 .day-axis span:nth-child(3) { grid-row: 5; }
+
+.brand { user-select: none; -webkit-user-select: none; touch-action: none; }
+.private-area { min-height: 100dvh; background: #f6f7f8; padding-bottom: 24px; }
+.private-header { position: sticky; top: 0; z-index: 20; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 15px; background: #fff; border-bottom: 1px solid var(--border); }
+.private-header > span, .private-header button { display: inline-flex; align-items: center; gap: 6px; }
+.private-area .private-main { max-width: 900px; margin: auto; padding: 20px 14px; display: grid; gap: 20px; }
+.private-gate, .private-list, .private-calendar { padding: 22px; }
+.private-gate { display: grid; gap: 16px; }
+.private-gate h1 { font-size: 1.6rem; font-weight: 650; }
+.private-gate h2 { font-size: 1.1rem; }
+.private-gate p { line-height: 1.6; color: #65716a; }
+.private-gate form { display: grid; gap: 16px; }
+.private-area label { display: grid; gap: 7px; font-size: 14px; }
+.private-area input:not([type=checkbox]), .private-area select { width: 100%; padding: 12px; border: 1px solid #cfd8cd; border-radius: 9px; background: white; min-height: 44px; }
+.private-check { display: flex !important; align-items: center; }
+.private-error { padding: 12px; border-radius: 8px; background: #fce9e5; color: #923c2b; overflow-wrap: anywhere; }
+.recovery-code { display: block; padding: 16px; background: #edf3e8; border-radius: 9px; overflow-wrap: anywhere; line-height: 1.9; font-size: 16px; user-select: text; }
+.private-date { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
+.private-date input { flex: 1; max-width: 180px; }
+.private-habit { padding: 18px 0; display: grid; gap: 12px; border-bottom: 1px solid #e6eae2; }
+.private-habit strong { overflow-wrap: anywhere; }
+.private-habit small { display: block; color: #65716a; margin-top: 5px; }
+.private-area .button-row { flex-wrap: wrap; }
+.private-calendar .section-head { gap: 12px; margin-bottom: 20px; }
+.private-calendar .button-row { margin-top: 20px; }
+.private-import { padding: 10px 4px; }
+.private-import input { margin-top: 8px; }

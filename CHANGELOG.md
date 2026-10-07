@@ -1,5 +1,14 @@
 # Changelog
 
+## 2.1.0 — Unreleased
+
+- Added a discreet private habit area opened by holding the Momentum logo, protected by a six-digit PIN.
+- Added private habit creation, editing, logging, individual calendars, streaks, and atomic migration of public habits with their history.
+- Kept private records out of public screens, statistics, JSON backups, and CSV exports.
+- Added authenticated encryption, Android Keystore protection, persistent failed-attempt delays, background/inactivity locking, and screenshot protection for private screens.
+- Added recovery codes, PIN recovery, and separate encrypted private backups that omit the PIN wrapper.
+- Added an additive database upgrade and tests for migration, transaction rollback, encryption, and private/public isolation.
+
 ## 2.0.2 — 2026-10-06
 
 - Fixed returning from a past week when its selected weekday falls after today in the current week.

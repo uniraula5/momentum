@@ -42,6 +42,28 @@ To restore, select **Restore backup**, choose a Momentum JSON file, and review t
 
 Backups are not encrypted. There is no account recovery or automatic cloud copy. Never uninstall or clear app storage as a troubleshooting step before exporting a backup.
 
+## Private habits
+
+1. Hold the **Momentum logo** for about one second. With a keyboard, focus it and press **Alt+Enter**.
+2. Choose and confirm a six-digit PIN.
+3. Write down the recovery code somewhere outside this phone and enter its last four characters to finish setup. The full code is shown only during setup.
+4. Add a private habit or choose **Move a public habit here**. Moving transfers its schedule and check-in history and removes it from the live public tracker.
+5. Use **Log**, **Edit**, and **Calendar** inside this area. Every private habit receives its own calendar and streak calculations.
+
+Private habits are excluded from public lists, calendars, totals, reviews generated from those totals, JSON exports, and CSV exports. Previously exported files and any habit names you manually typed into public goals, notes, or review drafts remain unchanged.
+
+**Lock** hides the private workspace immediately. Leaving the app, opening the Android document picker, or two minutes without interaction also locks it. Unsaved forms are discarded. Private screens are protected from screenshots and recent-app previews; mirroring may show a blank screen there.
+
+Use **Change PIN** with your existing PIN, or **Forgot PIN?** with the recovery code. Failed attempts trigger increasing delays. There is no online account recovery. Losing both codes means the private records cannot be recovered.
+
+### Private backups
+
+Choose **Export encrypted backup** from the unlocked area and save the JSON file outside the app. Keep its recovery code separately. Private backups require the recovery code, even if you remember the PIN. They can be restored on another phone without the original device key.
+
+Choose **Choose encrypted private backup** to import. If a private area already exists, unlock it first, enter the backup's recovery code, choose a new PIN, and confirm replacement. Restore replaces only private records. Export the current private records first if you need to keep them. The backup's original recovery code continues to apply. Public backups and private backups are separate and cannot substitute for each other.
+
+Keep both types of backup. Updating the app preserves them on-device; uninstalling or clearing storage removes the records and the device encryption key.
+
 ## Updates
 
 Install a newer signed APK over Momentum. Existing records remain in app-private storage. A signing-key mismatch prevents the update; obtain a build signed with the original key rather than uninstalling.

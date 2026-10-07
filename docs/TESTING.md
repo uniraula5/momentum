@@ -40,3 +40,11 @@ All 25 automated tests pass, including all 49 combinations of the previous and c
 At a 393 × 851 mobile viewport, the bundled UI was exercised with disposable records and a simulated native storage bridge: previous Sunday → current Tuesday, automatic calendar creation for a new activity, logging directly from that calendar, unchanged state in another activity, and persistence after reload. The Today screen no longer includes a combined contribution calendar.
 
 No Android device was connected during this update, so installation and physical-device touch checks remain unverified for 2.0.2. The test bridge exists only in ignored preview artifacts and is not packaged in the APK.
+
+## 2.1.0 work in progress
+
+TypeScript checking and all 32 Node tests pass. The 11 Android instrumentation tests passed on a disposable API-35 emulator, covering additive database migration, public/private isolation, atomic move rollback, failed-attempt persistence, and Android Keystore encryption and tamper rejection.
+
+A browser fixture at a 393 × 851 viewport verified private-area setup, recovery-code confirmation, habit creation, check-in notes, automatically generated calendars, streak updates, past/current week navigation, moving a public habit, public-screen exclusion, and incorrect-PIN rejection. This fixture simulates the native bridge; it does not prove Android picker or lifecycle behavior.
+
+The encrypted-backup browser download check timed out and remains unverified. Final backup, lifecycle, PIN-recovery, release-build, and physical-device checks remain in [TODO.md](../TODO.md). No signed 2.1.0 APK has been delivered or installed.

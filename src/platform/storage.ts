@@ -9,7 +9,11 @@ export interface TrackerStorage {
 }
 declare global {
   interface Window {
-    Momentum?: { read(): string; write(document: string, revision: number): string; exportFile(name: string, content: string, type: string): void; closeApp(): void };
+    Momentum?: { read(): string; write(document: string, revision: number): string; exportFile(name: string, content: string, type: string): void; closeApp(): void;
+      vaultStatus(): string; vaultAttempt(): string; vaultAccept(token: string): string;
+      vaultCommit(envelope: string, revision: number, publicDocument: string | null, publicRevision: number): string;
+      vaultLock(): void; privateScreen(enabled: boolean): void;
+    };
   }
 }
 function native() {

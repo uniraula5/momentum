@@ -23,6 +23,12 @@ public final class MainActivity extends ComponentActivity {
     private static final String HOME = "https://appassets.androidplatform.net/assets/index.html";
     private static final int IMPORT_FILE = 10, EXPORT_FILE = 11;
     private WebView web;
+    private final VaultProtection vaultProtection = new VaultProtection();
+    private final Object vaultGuard = new Object();
+    private boolean vaultUnlocked = false;
+    private String vaultAttemptToken;
+    private volatile boolean privateScreen = false;
+    private volatile boolean foreground = false;
     private TrackerDatabase database;
     private ValueCallback<Uri[]> fileCallback;
     private File pendingExport;
@@ -90,7 +96,56 @@ public final class MainActivity extends ComponentActivity {
         try { return new JSONObject().put("error", e.getMessage() == null ? "Could not save on this phone. Please retry." : e.getMessage()).toString(); }
         catch (Exception ignored) { return "{\"error\":\"Storage unavailable\"}"; }
     }
+    private void lockVault() { synchronized (vaultGuard) { vaultUnlocked = false; vaultAttemptToken = null; } }
     public final class LocalBridge {
+        @JavascriptInterface public String vaultStatus() {
+            try { return new JSONObject().put("exists", !database.readVault().isNull("document")).toString(); }
+            catch (Exception e) { return failure(e); }
+        }
+        @JavascriptInterface public String vaultAttempt() {
+            synchronized (vaultGuard) {
+                try {
+                    if (!foreground || !privateScreen) throw new IllegalStateException("Reopen the private area.");
+                    database.reserveVaultAttempt(System.currentTimeMillis());
+                    JSONObject record = database.readVault();
+                    if (record.isNull("document")) throw new IllegalStateException("No private area has been set up.");
+                    vaultAttemptToken = java.util.UUID.randomUUID().toString();
+                    return new JSONObject().put("envelope", new JSONObject(vaultProtection.open(record.getString("document"))))
+                        .put("revision", record.getLong("revision")).put("token", vaultAttemptToken).toString();
+                } catch (Exception e) { return failure(e); }
+            }
+        }
+        @JavascriptInterface public String vaultAccept(String token) {
+            synchronized (vaultGuard) {
+                try {
+                    if (!foreground || token == null || !token.equals(vaultAttemptToken)) throw new IllegalStateException("Session expired. Unlock again.");
+                    vaultAttemptToken = null; vaultUnlocked = true; database.resetVaultAttempts(); return "{}";
+                } catch (Exception e) { return failure(e); }
+            }
+        }
+        @JavascriptInterface public String vaultCommit(String envelope, long revision, String publicDocument, long publicRevision) {
+            synchronized (vaultGuard) {
+                try {
+                    if (!foreground || !privateScreen) throw new IllegalStateException("Private area is locked.");
+                    if (!vaultUnlocked && !(revision == 0 && database.readVault().isNull("document") && publicDocument == null)) throw new IllegalStateException("Unlock private habits first.");
+                    if (envelope == null || envelope.length() > 4000000) throw new IllegalArgumentException("Private document too large.");
+                    JSONObject value = new JSONObject(envelope);
+                    if (!"momentum-vault".equals(value.getString("format")) || value.getInt("version") != 1) throw new IllegalArgumentException("Invalid private document.");
+                    JSONObject result = database.commitVault(vaultProtection.seal(envelope), revision, publicDocument, publicRevision);
+                    vaultUnlocked = true; return result.toString();
+                } catch (Exception e) { return failure(e); }
+            }
+        }
+        @JavascriptInterface public void vaultLock() { lockVault(); }
+        @JavascriptInterface public void privateScreen(boolean enabled) {
+            privateScreen = enabled;
+            if (!enabled) lockVault();
+            runOnUiThread(() -> {
+                if (privateScreen) getWindow().addFlags(android.view.WindowManager.LayoutParams.FLAG_SECURE);
+                else getWindow().clearFlags(android.view.WindowManager.LayoutParams.FLAG_SECURE);
+            });
+        }
+
         @JavascriptInterface public String read() {
             try { return database.read().toString(); } catch (Exception e) { return failure(e); }
         }
@@ -137,8 +192,22 @@ public final class MainActivity extends ComponentActivity {
             if (pendingExport.exists() && !pendingExport.delete()) pendingExport.deleteOnExit();
         }
     }
-    @Override protected void onResume() { super.onResume(); if (web != null) web.onResume(); }
-    @Override protected void onPause() { if (web != null) web.onPause(); super.onPause(); }
+    @Override protected void onResume() {
+        super.onResume(); foreground = true;
+        if (web != null) {
+            web.onResume();
+            web.evaluateJavascript("window.dispatchEvent(new Event('momentum-lock'))", result -> { if (foreground) web.setVisibility(android.view.View.VISIBLE); });
+        }
+    }
+    @Override protected void onPause() {
+        foreground = false; lockVault();
+        if (web != null) {
+            if (privateScreen) web.setVisibility(android.view.View.INVISIBLE);
+            web.evaluateJavascript("window.dispatchEvent(new Event('momentum-lock'))", null);
+            web.onPause();
+        }
+        super.onPause();
+    }
     @Override protected void onDestroy() {
         if (fileCallback != null) fileCallback.onReceiveValue(null);
         if (web != null) { web.removeJavascriptInterface("Momentum"); web.destroy(); }

@@ -28,7 +28,7 @@ flowchart TD
 
 ## Storage
 
-A single SQLite row contains the validated tracker document and its revision. The document includes profile preferences, habits with effective-dated plans, entries keyed by habit/date, milestones, and saved weekly reviews. Updating the document occurs in a transaction. An unexpected revision rejects the write rather than silently overwriting newer state.
+The public SQLite row contains the validated tracker document and its revision. The document includes profile preferences, habits with effective-dated plans, entries keyed by habit/date, milestones, and saved weekly reviews. Updating the document occurs in a transaction. An unexpected revision rejects the write rather than silently overwriting newer state.
 
 The UI reports success only after the transaction succeeds. Read failures preserve existing data and show an error; they never replace the database with an empty tracker. Schema upgrades must be additive. Starter-label migrations preserve habit identifiers, schedules, custom names, and existing entries.
 
@@ -39,11 +39,11 @@ Unsaved weekly reflections are stored separately in the app's local WebView stor
 - The Android manifest does not request internet permission.
 - All interface assets are bundled with the APK.
 - Network loads, arbitrary navigation, file URLs, frames, and remote connections are blocked.
-- The JavaScript bridge exposes only tracker read/write, file export, and moving the task to the background.
+- The JavaScript bridge exposes public persistence, encrypted private persistence and unlock-attempt controls, private-screen protection, file export, and backgrounding.
 - Release builds disable WebView debugging.
 - Backups use Android's document picker; broad storage access is not requested.
 - OS cloud backup is disabled; users manage exports themselves.
-- SQLite lives in app-private storage. It is not separately encrypted by the application.
+- SQLite lives in app-private storage. Public records remain plaintext within that sandbox; private records are separately encrypted with AES-GCM and Android Keystore protection. See [Private habits](PRIVATE_HABITS.md).
 - Records and imports are capped at 2 MB and validated before persistence.
 
 ## Platform behavior

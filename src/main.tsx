@@ -4,6 +4,7 @@ import Tracker from './components/Tracker';
 import { phoneStorage } from './platform/storage';
 import './styles/globals.css';
 import './styles/mobile.css';
+import PrivateArea from './components/PrivateArea';
 class ErrorBoundary extends React.Component<React.PropsWithChildren, { failed: boolean }> {
   state = { failed: false };
   static getDerivedStateFromError() { return { failed: true }; }
@@ -12,4 +13,8 @@ class ErrorBoundary extends React.Component<React.PropsWithChildren, { failed: b
     return this.props.children;
   }
 }
-createRoot(document.getElementById('root')!).render(<ErrorBoundary><Tracker storage={phoneStorage} /></ErrorBoundary>);
+function App() {
+  const [privateArea, setPrivateArea] = React.useState(false);
+  return privateArea ? <PrivateArea onExit={() => setPrivateArea(false)} /> : <Tracker storage={phoneStorage} onPrivate={() => setPrivateArea(true)} />;
+}
+createRoot(document.getElementById('root')!).render(<ErrorBoundary><App /></ErrorBoundary>);

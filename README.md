@@ -6,8 +6,11 @@ An offline Android habit tracker for building a consistent practice across learn
 
 [Download the latest APK](https://github.com/uniraula5/momentum/releases/latest) · [User guide](docs/USER_GUIDE.md) · [Development](docs/DEVELOPMENT.md) · [Architecture](docs/ARCHITECTURE.md)
 
+**Development status:** `main` includes the upcoming 2.1.0 private-habit feature. The latest released APK is 2.0.2; final 2.1.0 validation and packaging remain in [TODO.md](TODO.md).
+
 ## Features
 
+- Hidden, PIN-protected habits with individual calendars, encrypted storage, automatic locking, and separate encrypted backups.
 - Daily check-ins with numeric targets, session notes, historical entries, and recovery days.
 - Current and longest streaks based on each habit's scheduled days.
 - Individual activity calendars with fixed completion, partial-progress, recovery, and missed-day colors; new activities get a calendar automatically.
@@ -29,7 +32,11 @@ Android 6.0 or later is required. An up-to-date Android System WebView is recomm
 
 For updates, install the newer APK over the existing app. **Do not uninstall or clear storage to update.** Official release builds use the same package and signing key to preserve records.
 
-Export a JSON backup regularly from **Routines → Export backup**. Uninstalling, clearing storage, or losing your phone can remove records. Backups are ordinary, unencrypted JSON files; store them somewhere you trust. There is no automatic cloud sync or backup.
+Export a JSON backup regularly from **Routines → Export backup**. Uninstalling, clearing storage, or losing your phone can remove records. Public backups are ordinary, unencrypted JSON files; store them somewhere you trust. There is no automatic cloud sync or backup.
+
+## Private habits
+
+Hold the **Momentum logo** for about one second to open the private area. Set a six-digit PIN and save the recovery code outside your phone. Private habits stay out of public screens, statistics, and ordinary exports. The area locks when you leave the app or after two minutes of inactivity. See the [private habit guide](docs/USER_GUIDE.md#private-habits) and [security design](docs/PRIVATE_HABITS.md).
 
 ## How streaks work
 
@@ -80,4 +87,4 @@ For release signing, installation commands, and device testing, see [Development
 
 ## License notices
 
-This is a private project; no public open-source license is granted for the project as a whole. Third-party components retain their original licenses. See [third-party notices](THIRD_PARTY_NOTICES.md) and `vendor/`.
+The source is publicly available, but no open-source license is granted for the project as a whole. Third-party components retain their original licenses. See [third-party notices](THIRD_PARTY_NOTICES.md) and `vendor/`.
