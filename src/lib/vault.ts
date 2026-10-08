@@ -27,6 +27,11 @@ function privateState(value: unknown): State {
   if (state.goals.length || Object.keys(state.reviews).length) throw new Error('Invalid private habit document.');
   return state;
 }
+function serializePrivateState(state: State) {
+  const document = text.encode(JSON.stringify(privateState(state)));
+  if (document.byteLength > 2_000_000) throw new Error('Private habits exceed the 2 MB limit. Export a backup.');
+  return document;
+}
 async function aes(raw: Uint8Array<ArrayBuffer>) { return crypto.subtle.importKey('raw', raw, 'AES-GCM', false, ['encrypt', 'decrypt']); }
 async function derive(secret: string, salt: Uint8Array<ArrayBuffer>) {
   const source = await crypto.subtle.importKey('raw', text.encode(secret), 'PBKDF2', false, ['deriveKey']);
@@ -50,7 +55,7 @@ export function emptyPrivateState(profile: Pick<State, 'name' | 'timezone'>): St
   return { version: 1, name: profile.name, timezone: profile.timezone, habits: [], entries: {}, goals: [], reviews: {} };
 }
 export async function createVault(pin: string, state: State) {
-  pinValid(pin); privateState(state);
+  pinValid(pin); const document = serializePrivateState(state);
   const raw = bytes(32), id = crypto.randomUUID();
   const recoveryCode = Array.from(bytes(32), n => n.toString(16).padStart(2, '0')).join('').toUpperCase().match(/.{4}/g)!.join('-');
   try {
@@ -58,7 +63,7 @@ export async function createVault(pin: string, state: State) {
     const envelope: Envelope = { version: 1, format: 'momentum-vault', id,
       pin: await wrap(raw, pin, `${id}:pin`),
       recovery: await wrap(raw, normalizeRecovery(recoveryCode), `${id}:recovery`),
-      payload: await seal(key, text.encode(JSON.stringify(state)), `${id}:state`),
+      payload: await seal(key, document, `${id}:state`),
     };
     return { session: { key, state, envelope }, recoveryCode };
   } finally { raw.fill(0); }
@@ -76,9 +81,8 @@ export async function unlockVault(value: unknown, credential: string, recovery =
   finally { raw?.fill(0); }
 }
 export async function encryptPrivateState(session: VaultSession, state: State): Promise<Envelope> {
-  const document = JSON.stringify(privateState(state));
-  if (document.length > 2_000_000) throw new Error('Private habits exceed the 2 MB limit. Export a backup.');
-  return { ...session.envelope, payload: await seal(session.key, text.encode(document), `${session.envelope.id}:state`) };
+  const document = serializePrivateState(state);
+  return { ...session.envelope, payload: await seal(session.key, document, `${session.envelope.id}:state`) };
 }
 export async function changePin(value: unknown, credential: string, nextPin: string, recovery = false) {
   pinValid(nextPin);
@@ -99,6 +103,7 @@ export async function restorePrivateBackup(value: unknown, recoveryCode: string,
   try {
     const key = await aes(raw);
     const state = privateState(JSON.parse(new TextDecoder().decode(await open(key, backup.payload, `${backup.id}:state`))));
+    serializePrivateState(state);
     const envelope: Envelope = { ...backup, format: 'momentum-vault', pin: await wrap(raw, nextPin, `${backup.id}:pin`) };
     return { key, state, envelope };
   } finally { raw.fill(0); }

@@ -1,6 +1,6 @@
 # Private habits — resume checklist
 
-Status: private-habit implementation is in progress for 2.1.0. The latest released APK is 2.0.2; a signed 2.1.0 APK has not been built or installed. This checklist records outstanding validation and delivery work.
+Status: private-habit implementation is in progress for 2.1.0. The latest released APK is 2.0.2; a signed 2.1.0 APK has been built locally but not installed or published. This checklist records outstanding validation and delivery work.
 
 ## Completed
 
@@ -18,10 +18,10 @@ Status: private-habit implementation is in progress for 2.1.0. The latest releas
 ## Remaining, in order
 
 - [ ] Complete browser checks: reload persistence, explicit/background/idle locking, encrypted export/import round trip, recovery/PIN-change flow. The browser download check timed out; export success is unverified. Use disposable test records and credentials.
-- [ ] Review UTF-8 size enforcement in src/lib/vault.ts: encryptPrivateState currently limits JSON character count, while base64 schema limits can reject a large multibyte payload on reopen. Enforce serialized UTF-8 byte limit consistently and add a meaningful regression test.
+- [x] Enforce UTF-8 byte limits on private creation, saves, and restore; regression test rejects oversized Unicode history and verifies accepted histories reopen.
 - [ ] Check native picker resume/import behavior and private screen protection as far as available UI tools allow; clearly document anything unverified. Import ciphertext was adjusted to survive lifecycle locking without carrying a decrypted session.
 - [ ] Update docs/TESTING.md with actual 2.1.0 results and limitations; correct outdated 2.0.2 installation status only with evidence.
-- [ ] Re-run appropriate checks after fixes; use Java 21 and `npm run android:release` to build the signed release.
+- [x] Run typecheck, all 33 Node tests, production build, Android release lint, and signed APK assembly (2026-10-08).
 - [ ] Verify same signing certificate, no INTERNET permission, and no test bridge included in APK.
 - [ ] Install release in place on the target Pixel 8 using `adb -s DEVICE_SERIAL install -r APK_PATH`. Never uninstall or clear daily records. Use an emulator for the separate QA package. Leave real PIN setup to the device owner.
 - [ ] Verify version and only one Momentum package; test available phone UI without claiming checks that could not be completed.
@@ -36,3 +36,10 @@ Status: private-habit implementation is in progress for 2.1.0. The latest releas
 - Run `npm run typecheck`, `npm test`, and Android instrumentation tests on a disposable emulator.
 - Browser UI fixtures belong under ignored `artifacts/` and must never be copied into release assets.
 - Public and private backups must both be tested; document what passed and what remains unverified.
+
+## Latest checkpoint — 2026-10-08
+
+- Signed artifact: `artifacts/Momentum-2.1.0.apk`, with adjacent SHA-256 file (ignored locally). Version 2.1.0 / code 5, same production certificate, no INTERNET permission.
+- Browser fixture verified previous-day private records survive reopening, encrypted export omits plaintext and PIN wrapper, the simulated picker locks the workspace, and recovery resets the PIN while preserving records. Export was captured at the simulated native bridge; this does not verify Android file writing.
+- Final backup import, idle/background behavior, and physical-device picker/screenshot checks remain open. No phone was connected.
+- Session stopped after the account usage reading jumped from 9% to 53%, exceeding the requested additional budget between readings. No GitHub release was published.

@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { createVault, unlockVault, encryptPrivateState, changePin, exportPrivateBackup, restorePrivateBackup, emptyPrivateState, moveToPrivate, backupSchema } from '../src/lib/vault';
-import { createInitial, streaks } from '../src/lib/tracker';
+import { createInitial, streaks, type State } from '../src/lib/tracker';
 
 const publicFixture = () => createInitial('2026-09-21');
 const secretState = () => { const state = publicFixture(); return { ...state, habits: [state.habits[0]], goals: [], reviews: {}, entries: { study: { '2026-09-21': { value: 60, note: 'Private session note', rest: false } } } }; };
@@ -61,4 +61,23 @@ test('moving a habit removes all public entries and preserves private schedule a
 test('invalid PIN and plain public backups cannot create or replace a vault', async () => {
   await assert.rejects(createVault('123', secretState()), /six-digit/);
   await assert.rejects(restorePrivateBackup(publicFixture(), 'A'.repeat(64), '246802'));
+});
+
+test('UTF-8 payload limits reject oversized multibyte histories before saving and preserve the old vault', async () => {
+  const state: State = secretState();
+  state.habits[0].created = '2024-01-01'; state.habits[0].plans[0].from = '2024-01-01';
+  state.entries.study = {};
+  for (let i = 0; i < 400; i++) {
+    const day = new Date(Date.UTC(2024, 0, i + 1)).toISOString().slice(0, 10);
+    state.entries.study[day] = { value: 60, note: '界'.repeat(2000), rest: false };
+  }
+  assert.ok(JSON.stringify(state).length < 2_000_000);
+  assert.ok(new TextEncoder().encode(JSON.stringify(state)).byteLength > 2_000_000);
+  const { session } = await createVault('135790', secretState());
+  await assert.rejects(createVault('135790', state), /2 MB/);
+  await assert.rejects(encryptPrivateState(session, state), /2 MB/);
+  assert.deepEqual((await unlockVault(session.envelope, '135790')).state, session.state);
+  for (const day of Object.keys(state.entries.study).slice(300)) delete state.entries.study[day];
+  const saved = await encryptPrivateState(session, state);
+  assert.deepEqual((await unlockVault(saved, '135790')).state, state);
 });
